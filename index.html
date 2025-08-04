@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL Builder</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>URL Builder</h1>
+    
+    <div class="input-group">
+      <label for="baseUrl">Base URL</label>
+      <input type="url" id="baseUrl" placeholder="https://example.com" value="https://example.com">
+    </div>
+    
+    <div id="paramsContainer">
+      <div class="param-row">
+        <input type="text" class="param-key" placeholder="Key (e.g. id)">
+        <input type="text" class="param-value" placeholder="Value (e.g. 123)">
+        <div class="encode-option">
+          <input type="checkbox" class="encode-check" id="encode0" checked>
+          <label for="encode0">URL Encode</label>
+        </div>
+        <button class="btn-remove">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <path d="M6 6L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <div class="action-buttons">
+      <button id="addParam">+ Add Parameter</button>
+      <button id="generateUrl">Generate URL</button>
+    </div>
+    
+    <div class="result">
+      <h3>Generated URL:</h3>
+      <div id="generatedUrl">URL will appear here</div>
+      
+      <div class="qrcode-container">
+        <h3>QR Code:</h3>
+        <div id="qrcode"></div>
+      </div>
+      
+      <div class="actions">
+        <button id="copyUrl">Copy URL</button>
+        <button id="downloadQR">Download QR Code</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

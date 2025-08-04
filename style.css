@@ -72,6 +72,61 @@
     box-shadow: 0 0 3px rgba(52, 152, 219, 0.2);
   }
   
+  /* Placeholder样式优化 */
+  input::placeholder {
+    color: #999;
+    font-style: italic;
+    opacity: 0.7;
+  }
+  
+  /* 多行输入框样式 */
+  .param-value {
+    resize: vertical;
+    min-height: 44px;
+    max-height: 44px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  
+  .param-value.expanded {
+    max-height: none;
+    overflow: visible;
+    white-space: pre-wrap;
+    text-overflow: clip;
+  }
+  
+  /* 折叠/展开按钮 */
+  .expand-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 4px;
+    font-size: 12px;
+    border-radius: 3px;
+    transition: all 0.2s;
+    display: none;
+  }
+  
+  .expand-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #333;
+  }
+  
+  .param-value-container {
+    position: relative;
+  }
+  
+  .param-value-container.has-overflow .expand-btn {
+    display: block;
+  }
+  
   .param-row {
     display: grid;
     grid-template-columns: 1fr 1fr auto auto;
@@ -136,17 +191,31 @@
     cursor: pointer;
     font-size: 16px;
     font-weight: 600;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
   }
   
   button:hover {
     background: var(--primary-dark);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+  }
+  
+  button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
+  }
+  
+  button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
   }
   
   .result {
@@ -167,7 +236,11 @@
     font-family: monospace;
     font-size: 16px;
     line-height: 1.5;
-    min-height: 60px;
+    min-height: 80px;
+    max-height: 200px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
   }
   
   .qrcode-container {

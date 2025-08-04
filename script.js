@@ -60,7 +60,6 @@ function addParameterRow(key = "", value = "", encode = true, index = null) {
     <input type="text" class="param-key" placeholder="Key" value="${key}">
     <div class="param-value-container">
       <input type="text" class="param-value" placeholder="Value" value="${value}">
-      <button class="expand-btn" title="展开/折叠">⋯</button>
     </div>
     <div class="encode-option">
       <input type="checkbox" class="encode-check" id="encode${rowIndex}" ${encode ? 'checked' : ''}>
@@ -87,23 +86,8 @@ function addParameterRow(key = "", value = "", encode = true, index = null) {
     input.addEventListener("input", debounce(() => {
       generateUrl();
       saveData();
-      checkOverflow(input);
     }, 300));
   });
-
-  // Add expand/collapse functionality
-  const expandBtn = newRow.querySelector(".expand-btn");
-  const valueInput = newRow.querySelector(".param-value");
-  const valueContainer = newRow.querySelector(".param-value-container");
-  
-  expandBtn.addEventListener("click", () => {
-    valueInput.classList.toggle("expanded");
-    expandBtn.textContent = valueInput.classList.contains("expanded") ? "−" : "⋯";
-    expandBtn.title = valueInput.classList.contains("expanded") ? "折叠" : "展开";
-  });
-
-  // Check initial overflow
-  checkOverflow(valueInput);
 }
 
 // Add parameter row
@@ -111,42 +95,14 @@ document.getElementById("addParam").addEventListener("click", () => {
   addParameterRow();
 });
 
-// Check if input has overflow and show/hide expand button
-function checkOverflow(input) {
-  if (input.classList.contains("param-value")) {
-    const container = input.closest(".param-value-container");
-    const expandBtn = container.querySelector(".expand-btn");
-    
-    // Check if content overflows
-    const scrollHeight = input.scrollHeight;
-    const clientHeight = input.clientHeight;
-    
-    if (scrollHeight > clientHeight) {
-      container.classList.add("has-overflow");
-    } else {
-      container.classList.remove("has-overflow");
-    }
-  }
-}
-
 // Initialize existing parameter rows
 function initializeExistingRows() {
-  // Add expand/collapse functionality to existing rows
-  document.querySelectorAll(".param-row").forEach((row) => {
-    const expandBtn = row.querySelector(".expand-btn");
-    const valueInput = row.querySelector(".param-value");
-    const valueContainer = row.querySelector(".param-value-container");
-    
-    if (expandBtn && valueInput) {
-      expandBtn.addEventListener("click", () => {
-        valueInput.classList.toggle("expanded");
-        expandBtn.textContent = valueInput.classList.contains("expanded") ? "−" : "⋯";
-        expandBtn.title = valueInput.classList.contains("expanded") ? "折叠" : "展开";
-      });
-      
-      // Check initial overflow
-      checkOverflow(valueInput);
-    }
+  // Add input listeners to existing rows
+  document.querySelectorAll(".param-row input").forEach((input) => {
+    input.addEventListener("input", debounce(() => {
+      generateUrl();
+      saveData();
+    }, 300));
   });
 }
 
@@ -164,7 +120,6 @@ document.querySelectorAll(".param-row input").forEach((input) => {
   input.addEventListener("input", debounce(() => {
     generateUrl();
     saveData();
-    checkOverflow(input);
   }, 300));
 });
 
@@ -222,81 +177,113 @@ function generateUrl() {
 }
 
 // Copy URL function
-document.getElementById("copyUrl").addEventListener("click", async () => {
-  const url = document.getElementById("generatedUrl").textContent;
-  if (!url || url === "URL will appear here") {
-    return;
-  }
-
+function initializeCopyButton() {
   const copyBtn = document.getElementById("copyUrl");
-  const originalText = copyBtn.textContent;
-  
-  try {
-    await navigator.clipboard.writeText(url);
-    
-    // Visual feedback
-    copyBtn.textContent = "✓ Copied!";
-    copyBtn.style.background = "#27ae60";
-    copyBtn.style.transform = "scale(1.05)";
-    
-    // Reset button after 2 seconds
-    setTimeout(() => {
-      copyBtn.textContent = originalText;
-      copyBtn.style.background = "";
-      copyBtn.style.transform = "";
-    }, 2000);
-    
-  } catch (err) {
-    console.error("Copy failed:", err);
-    
-    // Fallback for older browsers
-    const textArea = document.createElement("textarea");
-    textArea.value = url;
-    document.body.appendChild(textArea);
-    textArea.select();
-    
-    try {
-      document.execCommand("copy");
-    } catch (fallbackErr) {
-      console.error("Copy failed:", fallbackErr);
-    }
-    
-    document.body.removeChild(textArea);
+  if (copyBtn) {
+    copyBtn.addEventListener("click", async () => {
+      const url = document.getElementById("generatedUrl").textContent;
+      if (!url || url === "URL will appear here" || url === "Please enter a base URL") {
+        return;
+      }
+
+      const originalText = copyBtn.textContent;
+      
+      // Check if modern clipboard API is available
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(url);
+          
+          // Visual feedback
+          copyBtn.textContent = "✓ Copied!";
+          copyBtn.style.background = "#27ae60";
+          copyBtn.style.transform = "scale(1.05)";
+          
+          // Reset button after 2 seconds
+          setTimeout(() => {
+            copyBtn.textContent = originalText;
+            copyBtn.style.background = "";
+            copyBtn.style.transform = "";
+          }, 2000);
+          
+        } catch (err) {
+          console.error("Modern clipboard API failed:", err);
+          // Fall through to fallback method
+        }
+      }
+      
+      // Fallback for older browsers or when modern API fails
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = url;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        const successful = document.execCommand("copy");
+        document.body.removeChild(textArea);
+        
+        if (successful) {
+          // Visual feedback
+          copyBtn.textContent = "✓ Copied!";
+          copyBtn.style.background = "#27ae60";
+          copyBtn.style.transform = "scale(1.05)";
+          
+          // Reset button after 2 seconds
+          setTimeout(() => {
+            copyBtn.textContent = originalText;
+            copyBtn.style.background = "";
+            copyBtn.style.transform = "";
+          }, 2000);
+        } else {
+          console.error("Fallback copy method failed");
+        }
+        
+      } catch (fallbackErr) {
+        console.error("Copy failed:", fallbackErr);
+      }
+    });
   }
-});
+}
 
 // Download QR code function
-document.getElementById("downloadQR").addEventListener("click", () => {
-  const canvas = document.querySelector("#qrcode canvas");
-  if (!canvas) {
-    return;
-  }
-
+function initializeDownloadButton() {
   const downloadBtn = document.getElementById("downloadQR");
-  const originalText = downloadBtn.textContent;
-  
-  try {
-    const link = document.createElement("a");
-    link.download = "url-qrcode.png";
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-    
-    // Visual feedback
-    downloadBtn.textContent = "✓ Downloaded!";
-    downloadBtn.style.background = "#27ae60";
-    downloadBtn.style.transform = "scale(1.05)";
-    
-    // Reset button after 2 seconds
-    setTimeout(() => {
-      downloadBtn.textContent = originalText;
-      downloadBtn.style.background = "";
-      downloadBtn.style.transform = "";
-    }, 2000);
-    
-  } catch (err) {
-    console.error("Download failed:", err);
+  if (downloadBtn) {
+    downloadBtn.addEventListener("click", () => {
+      const canvas = document.querySelector("#qrcode canvas");
+      if (!canvas) {
+        return;
+      }
+
+      const originalText = downloadBtn.textContent;
+      
+      try {
+        const link = document.createElement("a");
+        link.download = "url-qrcode.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        
+        // Visual feedback
+        downloadBtn.textContent = "✓ Downloaded!";
+        downloadBtn.style.background = "#27ae60";
+        downloadBtn.style.transform = "scale(1.05)";
+        
+        // Reset button after 2 seconds
+        setTimeout(() => {
+          downloadBtn.textContent = originalText;
+          downloadBtn.style.background = "";
+          downloadBtn.style.transform = "";
+        }, 2000);
+        
+      } catch (err) {
+        console.error("Download failed:", err);
+      }
+    });
   }
-});
+}
 
 // Base URL input listener
 document
@@ -322,4 +309,6 @@ function debounce(func, wait) {
 // Load saved data and generate initial URL
 loadData();
 initializeExistingRows();
+initializeCopyButton();
+initializeDownloadButton();
 generateUrl();

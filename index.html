@@ -19,7 +19,10 @@
     <div id="paramsContainer">
       <div class="param-row">
         <input type="text" class="param-key" placeholder="Key (e.g. id)">
-        <input type="text" class="param-value" placeholder="Value (e.g. 123)">
+        <div class="param-value-container">
+          <input type="text" class="param-value" placeholder="Value (e.g. 123)">
+          <button class="expand-btn" title="展开/折叠">⋯</button>
+        </div>
         <div class="encode-option">
           <input type="checkbox" class="encode-check" id="encode0" checked>
           <label for="encode0">URL Encode</label>
@@ -35,7 +38,6 @@
     
     <div class="action-buttons">
       <button id="addParam">+ Add Parameter</button>
-      <button id="generateUrl">Generate URL</button>
     </div>
     
     <div class="result">
